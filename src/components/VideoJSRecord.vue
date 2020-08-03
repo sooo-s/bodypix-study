@@ -3,6 +3,17 @@
     <button @click="mask">body-pix: 抽出</button>
     <button @click="maskWithBokeh">body-pix: ボケ</button>
     <button @click="stop = true">stop</button>
+    <br />
+    <label for="segmentationThreshold">segmentationThreshold:</label>
+    <input
+      type="number"
+      name="segmentationThreshold"
+      min="0.0"
+      max="1.0"
+      step="0.1"
+      v-model="segmentationThreshold"
+    />
+    <br />
     <div class="flex">
       <video id="myVideo" class="video-js vjs-default-skin" playsinline></video>
       <canvas id="video-canvas" class="video-canvas" ref="output" />
@@ -23,6 +34,7 @@ import * as bodyPix from "@tensorflow-models/body-pix";
 export default {
   data() {
     return {
+      segmentationThreshold: 0.7,
       stop: false,
       player: "",
       options: {
@@ -120,7 +132,9 @@ export default {
       const self = this;
       async function updateFrame() {
         try {
-          const segmentation = await self.net.segmentPerson(video);
+          const segmentation = await self.net.segmentPerson(video, {
+            segmentationThreshold: Number(self.segmentationThreshold),
+          });
           self.drawMask(segmentation, canvas, video, {
             r: 61,
             g: 220,

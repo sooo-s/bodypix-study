@@ -4,11 +4,21 @@
       <button @click="loadAndPredict('MobileNetV1')">MobileNetV1 抽出</button>
       <button @click="loadAndPredict('ResNet50')">ResNet50 抽出</button>
       <br />
+      <label for="multiplier">multiplier:</label>
       <select v-model="multiplier">
         <option>0.50</option>
         <option>0.75</option>
         <option>1.0</option>
       </select>
+      <label for="segmentationThreshold">segmentationThreshold:</label>
+      <input
+        type="number"
+        name="segmentationThreshold"
+        min="0.0"
+        max="1.0"
+        step="0.1"
+        v-model="segmentationThreshold"
+      />
       <label for="opacity">opacity:</label>
       <input type="number" name="opacity" min="0.0" max="1.0" step="0.1" v-model="opacity" />
       <label for="checkbox">flipHorizontal: {{ flipHorizontal }}</label>
@@ -36,6 +46,7 @@ export default {
       flipHorizontal: false,
       maskBlurAmount: 0,
       multiplier: 0.75,
+      segmentationThreshold: 0.7,
     };
   },
   methods: {
@@ -46,7 +57,9 @@ export default {
         architecture: architecture,
         multiplier: Number(multi),
       });
-      const segmentation = await net.segmentPerson(img);
+      const segmentation = await net.segmentPerson(img, {
+        segmentationThreshold: Number(this.segmentationThreshold),
+      });
       console.log(segmentation);
       const coloredPartImage = bodyPix.toMask(segmentation);
       const canvas = document.getElementById(architecture);
@@ -77,6 +90,7 @@ export default {
   justify-content: center;
 }
 .photo {
+  margin: 0;
   width: 342px;
 }
 @media screen and (max-width: 600px) {

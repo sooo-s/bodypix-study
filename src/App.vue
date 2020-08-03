@@ -1,6 +1,6 @@
 <template>
   <div id="app" class="wapper">
-    <h2>body-pixでバーチャル背景みたいなの作ってに応える</h2>
+    <h1>body-pixで「zoomのバーチャル背景みたいなの作って」に応える</h1>
     <a
       href="https://github.com/tensorflow/tfjs-models/tree/master/body-pix"
     >https://github.com/tensorflow/tfjs-models/tree/master/body-pix</a>
@@ -8,11 +8,11 @@
     <button @click="page--">←</button>
     <button @click="page++">→</button>
     <template v-if="page === 1">
-      <p>画像で人物抽出</p>
+      <h2>画像から人物抽出</h2>
       <ImagePix />
     </template>
     <template v-else-if="page === 2">
-      <p>カメラの入力で人物抽出</p>
+      <h2>映像から人物抽出</h2>
       <VideoJSRecord />
     </template>
   </div>
