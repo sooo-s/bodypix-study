@@ -1,132 +1,195 @@
 <template>
-  <div class="flex">
-    <video id="myVideo" class="video-js vjs-default-skin" playsinline></video>
+  <div>
+    <button @click="mask">body-pix: 抽出</button>
+    <button @click="maskWithBokeh">body-pix: ボケ</button>
+    <button @click="stop = true">stop</button>
+    <div class="flex">
+      <video id="myVideo" class="video-js vjs-default-skin" playsinline></video>
+      <canvas id="video-canvas" class="video-canvas" ref="output" />
+    </div>
   </div>
 </template>
 
 <script>
-    /* eslint-disable */
-    import 'video.js/dist/video-js.css'
-    import 'videojs-record/dist/css/videojs.record.css'
-    import videojs from 'video.js'
+/* eslint-disable */
+import "video.js/dist/video-js.css";
+import "videojs-record/dist/css/videojs.record.css";
+import videojs from "video.js";
+import "webrtc-adapter";
+import RecordRTC from "recordrtc";
+import Record from "videojs-record/dist/videojs.record.js";
+import * as bodyPix from "@tensorflow-models/body-pix";
 
-    import 'webrtc-adapter'
-    import RecordRTC from 'recordrtc'
-
-    // the following imports are only needed when you're recording
-    // audio-only using the videojs-wavesurfer plugin
-    /*
-    import WaveSurfer from 'wavesurfer.js';
-    import MicrophonePlugin from 'wavesurfer.js/dist/plugin/wavesurfer.microphone.js';
-    WaveSurfer.microphone = MicrophonePlugin;
-
-    // register videojs-wavesurfer plugin
-    import videojs_wavesurfer_css from 'videojs-wavesurfer/dist/css/videojs.wavesurfer.css';
-    import Wavesurfer from 'videojs-wavesurfer/dist/videojs.wavesurfer.js';
-    */
-
-    import Record from 'videojs-record/dist/videojs.record.js'
-
-    export default {
-        data() {
-            return {
-                player: '',
-                options: {
-                    controls: true,
-                    autoplay: false,
-                    fluid: false,
-                    loop: false,
-                    width: 320,
-                    height: 240,
-                    bigPlayButton: false,
-                    controlBar: {
-                        volumePanel: false
-                    },
-                    plugins: {
-                        /*
-                        // this section is only needed when recording audio-only
-                        wavesurfer: {
-                            backend: 'WebAudio',
-                            waveColor: '#36393b',
-                            progressColor: 'black',
-                            debug: true,
-                            cursorWidth: 1,
-                            displayMilliseconds: true,
-                            hideScrollbar: true,
-                            plugins: [
-                                // enable microphone plugin
-                                WaveSurfer.microphone.create({
-                                    bufferSize: 4096,
-                                    numberOfInputChannels: 1,
-                                    numberOfOutputChannels: 1,
-                                    constraints: {
-                                        video: false,
-                                        audio: true
-                                    }
-                                })
-                            ]
-                        },
-                        */
-                        // configure videojs-record plugin
-                        record: {
-                            audio: false,
-                            video: true,
-                            debug: true
-                        }
-                    }
-                }
-            };
+export default {
+  data() {
+    return {
+      stop: false,
+      player: "",
+      options: {
+        controls: true,
+        autoplay: false,
+        fluid: false,
+        loop: true,
+        width: 640,
+        height: 480,
+        bigPlayButton: false,
+        controlBar: {
+          volumePanel: false,
+          pictureInPictureToggle: false,
+          fullscreenToggle: false,
         },
-        mounted() {
-            /* eslint-disable no-console */
-            this.player = videojs('#myVideo', this.options, () => {
-                // print version information at startup
-                var msg = 'Using video.js ' + videojs.VERSION +
-                    ' with videojs-record ' + videojs.getPluginVersion('record') +
-                    ' and recordrtc ' + RecordRTC.version;
-                videojs.log(msg);
-            });
-
-            // device is ready
-            this.player.on('deviceReady', () => {
-                console.log('device is ready!');
-            });
-
-            // user clicked the record button and started recording
-            this.player.on('startRecord', () => {
-                console.log('started recording!');
-            });
-
-            // user completed recording and stream is available
-            this.player.on('finishRecord', () => {
-                // the blob object contains the recorded data that
-                // can be downloaded by the user, stored on server etc.
-                console.log('finished recording: ', this.player.recordedData);
-            });
-
-            // error handling
-            this.player.on('error', (element, error) => {
-                console.warn(error);
-            });
-
-            this.player.on('deviceError', () => {
-                console.error('device error:', this.player.deviceErrorCode);
-            });
+        plugins: {
+          // configure videojs-record plugin
+          record: {
+            audio: false,
+            video: {
+              // video media constraints: set resolution of camera
+              width: 640,
+              height: 480,
+            },
+            debug: true,
+          },
         },
-        beforeDestroy() { 
-            if (this.player) {
-                this.player.dispose();
-            }
-        }
+      },
+    };
+  },
+  async mounted() {
+    /* eslint-disable no-console */
+    this.player = videojs("#myVideo", this.options, () => {
+      // print version information at startup
+      var msg =
+        "Using video.js " +
+        videojs.VERSION +
+        " with videojs-record " +
+        videojs.getPluginVersion("record") +
+        " and recordrtc " +
+        RecordRTC.version;
+      videojs.log(msg);
+    });
+
+    // device is ready
+    this.player.on("deviceReady", () => {
+      console.log("device is ready!");
+    });
+
+    // user clicked the record button and started recording
+    this.player.on("startRecord", () => {
+      console.log("started recording!");
+    });
+
+    // user completed recording and stream is available
+    this.player.on("finishRecord", () => {
+      // the blob object contains the recorded data that
+      // can be downloaded by the user, stored on server etc.
+      console.log("finished recording: ", this.player.recordedData);
+    });
+
+    // error handling
+    this.player.on("error", (element, error) => {
+      console.warn(error);
+    });
+
+    this.player.on("deviceError", () => {
+      console.error("device error:", this.player.deviceErrorCode);
+    });
+    this.net = await bodyPix.load(/** optional arguments, see below **/);
+  },
+  beforeDestroy() {
+    if (this.player) {
+      this.player.dispose();
+      this.player;
     }
+  },
+  methods: {
+    mask() {
+      this.stop = false;
+      this.doBodyPix();
+    },
+    maskWithBokeh() {
+      this.stop = false;
+      console.log("bokeh");
+      this.bokeh();
+    },
+    doBodyPix() {
+      const canvas = document.getElementById("video-canvas");
+      canvas.setAttribute("width", 640);
+      canvas.setAttribute("height", 480);
+      const video = document.getElementById("myVideo_html5_api");
+      video.setAttribute("width", 640);
+      video.setAttribute("height", 480);
+      const self = this;
+      async function updateFrame() {
+        try {
+          const segmentation = await self.net.segmentPerson(video);
+          self.drawMask(segmentation, canvas, video, {
+            r: 61,
+            g: 220,
+            b: 132,
+            a: 255,
+          });
+        } catch (e) {
+          console.log(e);
+          window.console.log("Retrying...");
+        } finally {
+          if (self.stop) {
+            return;
+          }
+          requestAnimationFrame(updateFrame);
+        }
+      }
+      updateFrame();
+    },
+    drawMask(segmentation, canvas, video, color) {
+      const mask = bodyPix.toMask(
+        segmentation,
+        { r: 0, g: 0, b: 0, a: 0 },
+        color,
+        false
+      );
+      bodyPix.drawMask(canvas, video, mask, 1.0, 0, false);
+    },
+    bokeh() {
+      const canvas = document.getElementById("video-canvas");
+      canvas.setAttribute("width", 640);
+      canvas.setAttribute("height", 480);
+      const video = document.getElementById("myVideo_html5_api");
+      video.setAttribute("width", 640);
+      video.setAttribute("height", 480);
+      const self = this;
+      async function updateFrame() {
+        try {
+          const segmentation = await self.net.segmentPerson(video);
+          bodyPix.drawBokehEffect(canvas, video, segmentation, 3, 3, false);
+        } catch (e) {
+          console.log(e);
+          window.console.log("Retrying...");
+        } finally {
+          if (self.stop) {
+            return;
+          }
+          requestAnimationFrame(updateFrame);
+        }
+      }
+      updateFrame();
+    },
+  },
+};
 </script>
 
 <style>
 .flex {
   display: flex;
   justify-content: center;
+  margin: 0 auto;
+}
+.video-js,
+.vjs-tech,
+.video-canvas,
+#myVideo_html5_api {
+  width: 640px;
+  height: 480px;
 }
 #myVideo {
-  background-color: #95DDF5;
+  background-color: darkgray;
 }
 </style>
