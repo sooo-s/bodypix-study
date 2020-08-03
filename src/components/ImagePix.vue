@@ -89,7 +89,8 @@ export default {
   display: flex;
   justify-content: center;
 }
-.photo {
+.photo,
+.canvas {
   margin: 0;
   width: 342px;
 }

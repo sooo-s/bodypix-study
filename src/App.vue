@@ -35,7 +35,7 @@ export default {
   },
   head: {
     title: {
-      inner: "body-pixでバーチャル背景みたいなの作ってに応える",
+      inner: "body-pixで「zoomのバーチャル背景みたいなの作って」に応える",
     },
     link: [
       {
