@@ -72,12 +72,16 @@ export default {
 
 <style>
 .photo-block {
-  width: 50vw;
   margin: 0 auto;
   display: flex;
   justify-content: center;
 }
 .photo {
   width: 342px;
+}
+@media screen and (max-width: 600px) {
+  .photo-block {
+    flex-direction: column;
+  }
 }
 </style>

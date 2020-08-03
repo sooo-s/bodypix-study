@@ -192,4 +192,9 @@ export default {
 #myVideo {
   background-color: darkgray;
 }
+@media screen and (max-width: 600px) {
+  .flex {
+    flex-direction: column;
+  }
+}
 </style>
