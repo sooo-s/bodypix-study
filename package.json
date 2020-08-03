@@ -10,6 +10,7 @@
   "dependencies": {
     "@vue/cli": "^4.4.6",
     "core-js": "^3.6.5",
+    "videojs-record": "^4.0.0",
     "vue": "^2.6.11"
   },
   "devDependencies": {

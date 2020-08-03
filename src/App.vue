@@ -1,17 +1,17 @@
 <template>
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <VideoJSRecord />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import VideoJSRecord from './components/VideoJSRecord.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    VideoJSRecord
   }
 }
 </script>
